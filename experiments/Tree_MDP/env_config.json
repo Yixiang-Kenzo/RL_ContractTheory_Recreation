@@ -1,0 +1,28 @@
+{
+  "config": {
+    "n_actions": 2,
+    "gamma": 0.9,
+    "effort_cost_range": [
+      0.0,
+      0.15
+    ],
+    "principal_reward_range": [
+      0.0,
+      2.0
+    ],
+    "effort_bias": 0.8
+  },
+  "metrics": {
+    "effort_rate": 0.42806451612903224,
+    "pay_share": 0.03608483857625099,
+    "principal_value": 5.06222689163802
+  },
+  "calibration": {
+    "depth": 5,
+    "n_trees": 200,
+    "target_band": [
+      0.3,
+      0.6
+    ]
+  }
+}

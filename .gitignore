@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# The paper PDF is not redistributed here (read it on arXiv: 2407.18074)
+paper/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
