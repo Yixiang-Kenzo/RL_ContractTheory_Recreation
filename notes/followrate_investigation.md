@@ -56,6 +56,35 @@ the theory (ξ = 2Eₜ) predicts. The distance from the paper's headline numbers
 efficiency gap** from documented simplifications (uniform vs prioritized replay, single seed,
 3×3 vs 7×7) — not a failure of the method.
 
-*(Faithfulness check — whether the online-contract variant, Alg. 3 line 14 as written, is
-stable without our target-net substitution — and seed-variance results are appended below when
-available.)*
+## Diagnostic results (faithfulness + hypotheses)
+
+**Faithfulness — the target-net contract deviation is UNNECESSARY.** We tested training with
+the *faithful* online contract (Alg. 3 line 14 as written) vs our target-net substitution,
+keeping Huber loss + gradient clipping in both:
+
+| contract net | welfare trajectory | final payment | verdict |
+|---|---|---|---|
+| **online** (faithful, line 14) | 0.8 → 12.4 → 12.6 → 12.7 → 13.0 → 12.8 | 31% | **STABLE** |
+| target (our fix) | 0.8 → 12.4 → 12.8 → 12.7 → 12.7 → 12.8 | 26% | STABLE |
+
+Huber + grad-clip alone stabilize training; the target-net contract is not needed.
+**Action: revert to the online contract** to restore faithfulness to line 14 (a `contract_net`
+flag now supports both; `"online"` is the faithful setting).
+
+**Hypotheses (one principal, 3 validation seeds, nudge 0.1):**
+
+| val seed | follow acc | tail rising? | payment | compliance regret (mean / frac) |
+|---:|---:|---:|---:|---:|
+| 100 | 78.9% | +3.6% | 36.4% | 0.113 / 21% |
+| 101 | 76.6% | +5.2% | 34.5% | 0.125 / 23% |
+| 102 | 75.0% | +5.1% | 34.4% | 0.128 / 25% |
+
+- **H4 (seed variance):** follow-rate = **76.8% ± 2.0%** (75.0–78.9%). The band sits just
+  *below* 80% — a small **real** gap, not pure noise.
+- **H1 (undertraining): confirmed** — follow-rate still rising +3–5% at the end (not converged).
+- **H2 (contract quality): quantified** — in ~23% of agent-states the agent still slightly
+  prefers to deviate (regret ~0.12); this is the residual the nudge compensates for.
+
+**Conclusion:** the ~77% (vs paper ~90%) is explained by undertraining (40k vs 1M iters, still
+rising) + residual contract regret in ~23% of states — not seed noise, and not a broken method.
+The implementation is faithful (online contract works).
