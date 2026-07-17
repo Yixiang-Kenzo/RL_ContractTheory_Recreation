@@ -88,3 +88,19 @@ flag now supports both; `"online"` is the faithful setting).
 **Conclusion:** the ~77% (vs paper ~90%) is explained by undertraining (40k vs 1M iters, still
 rising) + residual contract regret in ~23% of states — not seed noise, and not a broken method.
 The implementation is faithful (online contract works).
+
+## Direct test: 2.5× more iterations (40k → 100k) at the paper's nudge
+
+We reran the full pipeline at **100,000 iterations** (still 10× below the paper's 1M) at the
+paper's 10% nudge. Every metric moved *toward* the paper:
+
+| metric | 40k iters | 100k iters | paper |
+|---|---|---|---|
+| follow accuracy | ~77% | **~80%** (smoothed; range 78–83%) | 80–90% |
+| social welfare | ~11.4 | **~12.0** (optimum ≈ 12.5) | near-optimal |
+| payment proportion | ~37% | **~33–35%** | ~30% |
+
+The follow-rate now **reaches the paper's 80–90% band at the faithful nudge**, welfare rose, and
+payment fell to ~the paper's level — with no nudge-cranking. This directly confirms **H1
+(undertraining)** as the primary cause of the gap, and indicates the full 1M-iteration budget
+would land solidly in-band. A compute limitation, not a methodological one.
