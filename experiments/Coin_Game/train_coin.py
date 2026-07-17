@@ -46,7 +46,8 @@ def av(obs_batch, i, device):
 def train_phase(size=3, horizon=20, iters=50_000, batch=128, target_every=100,
                 lr0=5e-4, lr1=1e-4, gamma=0.99, alpha=0.1, eps0=0.4, eps1=0.0,
                 buffer_cap=100_000, prefill=5_000, eval_every=2_000, seed=0,
-                device="cpu", verbose=True):
+                device="cpu", verbose=True, contract_net="target"):
+    """contract_net: 'target' (φ', our stability fix) or 'online' (Qφ, faithful to Alg.3 line 14)."""
     rng = np.random.default_rng(seed)
     torch.manual_seed(seed)
     env = CoinGame(size=size, horizon=horizon, rng=rng)
@@ -129,8 +130,9 @@ def train_phase(size=3, horizon=20, iters=50_000, batch=128, target_every=100,
             with torch.no_grad():
                 qp_next = tgt_theta(vpi).max(1).values                    # max qθ'(s')
                 qa_next = tgt_phi(vpi, f_other).max(1).values             # max Qφ'(s',f_{-i})
-                # contract from TARGET φ' with f_{-i}=1 (Alg.3 line 14; target net for stability)
-                qphi_ones = tgt_phi(vi, ones)
+                # contract with f_{-i}=1 (Alg.3 line 14). 'online' = faithful Qφ;
+                # 'target' = φ' (our stability fix). Testing which is needed.
+                qphi_ones = (qphi if contract_net == "online" else tgt_phi)(vi, ones)
                 b_i = (qphi_ones.max(1, keepdim=True).values - qphi_ones).gather(1, ai[:, None]).squeeze(1)
                 yp_i = _t(br[:, i], device) - alpha * b_i + gamma * (1 - done_t) * qp_next
                 ya_i = _t(br[:, i], device) + gamma * (1 - done_t) * qa_next

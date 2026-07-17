@@ -138,14 +138,27 @@ every number to the decimal:
 - **Tree MDP uses a small nudge** the paper reports it did not need. Nudging *is* part of their
   method (and mandatory for the Coin Game), so this is an implementation-quality difference,
   not a methodological one. See decision-log D-10/D-11.
-- **Coin Game is single-seed** (no error bars). Experiment 1 uses the paper's full 3×5 trials;
-  Experiment 2 does not yet.
-- **Coin Game uses uniform replay**; the paper uses prioritized replay.
+- **Coin Game is undertrained (40k vs the paper's 1,000,000 iterations), 3×3, single-seed —
+  all due to compute budget.** This machine is **CPU-only (no GPU)**; the full **1M iterations**
+  is ~3.6 hrs *per phase*, and the headline **7×7** grid plus multi-seed error bars were out of
+  reach. Our validation follow-rate was **still rising at 40k** (not converged) — see
+  [`notes/followrate_investigation.md`](notes/followrate_investigation.md) — so this 25×
+  undertraining is a documented, expected contributor to the follow-rate gap. The 3×3 grid *is*
+  a setting the paper itself reports (Appendix D.2 / Fig. 4). **The Tree MDP, by contrast,
+  matches the paper's stated 20,000 iterations exactly** — and reproduces closely. Experiment 1
+  uses the paper's full 3 instances × 5 trials; Experiment 2 is single-seed.
+- **Coin Game uses uniform replay**; the paper uses prioritized replay. This likely explains
+  the payment-efficiency gap documented in
+  [`notes/followrate_investigation.md`](notes/followrate_investigation.md).
+- **Coin Game follow-accuracy is nudge-controlled.** At the paper's 10% nudge our follow-rate
+  is **~73–77%** (still rising — undertrained), vs the paper's ~90%; a larger nudge reaches
+  80–90% at a higher payment cost — see the [nudge sweep](notes/followrate_investigation.md).
 - **Fig. 2 panels (d) SPE-ratio and (e) IC-ratio are not yet implemented.**
-- **Only the 3×3 grid.** The full 7×7 (paper's Fig. 2) needs GPU-scale compute (1M iterations).
 
 We hit — and fixed — a genuine training divergence in the multi-agent case (Huber loss +
-gradient clipping + target-network contracts); see the decision log.
+gradient clipping + target-network contracts). The target-network contract is a departure from
+Algorithm 3 line 14 (which uses the online net); see the decision log and
+[`notes/followrate_investigation.md`](notes/followrate_investigation.md).
 
 ---
 
